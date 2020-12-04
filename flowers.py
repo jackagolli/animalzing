@@ -4,11 +4,6 @@ import itertools
 from collections import Counter
 import numpy as np
 
-
-# 2 X 0 = 1
-# 1 x  = 0.5 1, 0.5 0
-# 0 x 0 = 0
-
 def mapGenotype(flower_str):
     flower_genotype = []
     flower = list(flower_str)
@@ -35,8 +30,6 @@ def mapGenotype(flower_str):
             elif flower[i] == '2':
                 flower_genotype.append('WW')
         # i==3 is for roses only
-
-    # flower_genotype = ''.join(flower_genotype)
 
     return flower_genotype
 
@@ -72,7 +65,6 @@ def process(genotype_series, colors_list):
     df = df.reindex(columns=['genotype','color','probability'])
 
     return df
-
 
 
 flower_1 = '112'
