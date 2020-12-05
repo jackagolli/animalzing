@@ -214,9 +214,9 @@ flower_type = 'mums'
 lookup_table = pd.read_csv(f'data/{flower_type}.csv', names=['genotype', 'color'])
 
 # 1) Lookup a flower color
-# flower = '120'
-# genotype = ''.join(mapGenotype(flower))
-# print(determineSingleColor(genotype,lookup_table))
+flower = '110'
+genotype = ''.join(mapGenotype(flower))
+print(determineSingleColor(genotype,lookup_table))
 
 # 2) Input two flowers to see possible hybrids and probabilities
 # flower_1 = '110'
@@ -230,12 +230,12 @@ lookup_table = pd.read_csv(f'data/{flower_type}.csv', names=['genotype', 'color'
 # results = reverseLookupColor(color, lookup_table)
 # print(results)
 # today = date.today()
-# results.to_csv(f'{today}2.csv',index=False)
+# results.to_csv(f'output/{color}_{today}.csv',index=False)
 
 # 4) See possible parents of specific genotype
-flower = '110'
-results = reverseLookupGenotype(flower, lookup_table)
-print(results)
-today = date.today()
-results.to_csv(f'{today}_specific.csv',index=False)
+# flower = '222'
+# results = reverseLookupGenotype(flower, lookup_table)
+# print(results)
+# today = date.today()
+# results.to_csv(f'output/{flower}_{today}.csv',index=False)
 
