@@ -149,8 +149,68 @@ def reverseLookupColor(color, lookup_table):
 
     return results_df
 
+def reverseLookupGenotype(flower, lookup_table):
+
+    genotype = ''.join(mapGenotype(flower))
+
+    all_genotypes = [''.join(p) for p in itertools.product('012', repeat=3)]
+    all_genotypes_copy = all_genotypes
+
+    combinations_array = np.zeros((1, 2))
+
+    for genotype1 in all_genotypes:
+
+        for genotype2 in all_genotypes_copy:
+            combinations_array = np.append(combinations_array, [[genotype1, genotype2]], axis=0)
+
+    combinations_array = np.delete(combinations_array, 0, axis=0)
+    combinations_array = np.insert(combinations_array, 1,
+                                   np.zeros((combinations_array.shape[0])),
+                                   axis=1)
+    combinations_array = np.append(combinations_array,
+                                   np.zeros((combinations_array.shape[0], 1)),
+                                   axis=1)
+
+    i = 0
+    for x in combinations_array:
+
+        flower1 = x[0]
+        flower2 = x[2]
+        flower1_g = ''.join(mapGenotype(flower1))
+        flower2_g = ''.join(mapGenotype(flower2))
+        f1_color = determineSingleColor(flower1_g, lookup_table)
+        f2_color = determineSingleColor(flower2_g, lookup_table)
+
+        combinations_array[i, 1] = f1_color
+        combinations_array[i, 3] = f2_color
+
+        hybrid = determineProbability(flower1, flower2, lookup_table)
+        matches = hybrid.loc[hybrid['genotype'] == genotype]
+        additional_cols = len(matches) * 2
+        comb_arr_size = combinations_array.shape
+
+        if 4 + additional_cols > comb_arr_size[1]:
+            arr = np.zeros((comb_arr_size[0], (additional_cols + 4) - comb_arr_size[1]))
+            combinations_array = np.append(combinations_array, arr, axis=1)
+
+        newlist = []
+        if not matches.empty:
+            for j, row in matches.iterrows():
+                newlist.append(row['genotype'])
+                newlist.append(row['probability'])
+
+            combinations_array[i, 4:4 + len(newlist)] = newlist
+            i += 1
+        else:
+            combinations_array = np.delete(combinations_array, i, axis=0)
+
+    results_df = pd.DataFrame(combinations_array)
+    results_df = results_df.rename(columns={0: 'flower1', 1: 'color1', 2: 'flower2', 3: 'color2'})
+
+    return results_df
+
 # Enter flower type
-flower_type = 'cosmos'
+flower_type = 'mums'
 lookup_table = pd.read_csv(f'data/{flower_type}.csv', names=['genotype', 'color'])
 
 # 1) Lookup a flower color
@@ -166,10 +226,16 @@ lookup_table = pd.read_csv(f'data/{flower_type}.csv', names=['genotype', 'color'
 # print(determineProbability(flower_1,flower_2,lookup_table))
 
 # 3) Select a color to see possible parents
-color = 'Pink'
-flower_type = 'cosmos'
-results = reverseLookupColor(color, lookup_table)
+# color = 'Yellow'
+# results = reverseLookupColor(color, lookup_table)
+# print(results)
+# today = date.today()
+# results.to_csv(f'{today}2.csv',index=False)
+
+# 4) See possible parents of specific genotype
+flower = '110'
+results = reverseLookupGenotype(flower, lookup_table)
 print(results)
 today = date.today()
-results.to_csv(f'{today}.csv',index=False)
+results.to_csv(f'{today}_specific.csv',index=False)
 
