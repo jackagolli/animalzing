@@ -29,8 +29,13 @@ def mapGenotype(flower_str):
                 flower_genotype.append('Ww')
             elif flower[i] == '2':
                 flower_genotype.append('WW')
-        # i==3 is for roses only
-
+        elif i==3:
+            if flower[i] == '0':
+                flower_genotype.append('bb')
+            elif flower[i] == '1':
+                flower_genotype.append('Bb')
+            elif flower[i] == '2':
+                flower_genotype.append('BB')
     return flower_genotype
 
 # finds all possible unique combinations of genes (Punnett square)
@@ -40,7 +45,7 @@ def permute(str1, str2, n):
     for i in range(n):
         combinations.append([''.join(sorted(p)) for p in itertools.product(str1[i], str2[i])])
 
-    combinations = list(map(''.join, zip(*combinations)))
+    combinations = [''.join(x) for x in list(itertools.product(*combinations))]
     combinations_df = pd.DataFrame(combinations)
     normalized = combinations_df.value_counts(normalize=True)
 
@@ -91,9 +96,14 @@ def determineProbability(flower_1, flower_2, lookup_table):
     return genotype_df
 
 # See all possible flower combinations to produce a given color hybrid
-def reverseLookupColor(color, lookup_table):
+def reverseLookupColor(color, flower_type, lookup_table):
 
-    all_genotypes = [''.join(p) for p in itertools.product('012', repeat=3)]
+    if flower_type == 'roses':
+        n = 4
+    else:
+        n = 3
+
+    all_genotypes = [''.join(p) for p in itertools.product('012', repeat=n)]
     all_genotypes_copy = all_genotypes
 
     combinations_array = np.zeros((1, 2))
@@ -149,11 +159,16 @@ def reverseLookupColor(color, lookup_table):
 
     return results_df
 
-def reverseLookupGenotype(flower, lookup_table):
+def reverseLookupGenotype(flower, flower_type, lookup_table):
+
+    if flower_type == 'roses':
+        n = 4
+    else:
+        n = 3
 
     genotype = ''.join(mapGenotype(flower))
 
-    all_genotypes = [''.join(p) for p in itertools.product('012', repeat=3)]
+    all_genotypes = [''.join(p) for p in itertools.product('012', repeat=n)]
     all_genotypes_copy = all_genotypes
 
     combinations_array = np.zeros((1, 2))
@@ -214,28 +229,27 @@ flower_type = 'mums'
 lookup_table = pd.read_csv(f'data/{flower_type}.csv', names=['genotype', 'color'])
 
 # 1) Lookup a flower color
-flower = '110'
-genotype = ''.join(mapGenotype(flower))
-print(determineSingleColor(genotype,lookup_table))
+# flower = '120'
+# genotype = ''.join(mapGenotype(flower))
+# print(determineSingleColor(genotype,lookup_table))
 
 # 2) Input two flowers to see possible hybrids and probabilities
-# flower_1 = '110'
-# flower_2 = '210'
-# flower_type = 'cosmos'
+# flower_1 = '2001'
+# flower_2 = '2001'
 # print(f'flower 1 ({flower_1}) + flower 2 ({flower_2}) = ')
 # print(determineProbability(flower_1,flower_2,lookup_table))
 
 # 3) Select a color to see possible parents
-# color = 'Yellow'
-# results = reverseLookupColor(color, lookup_table)
-# print(results)
-# today = date.today()
-# results.to_csv(f'output/{color}_{today}.csv',index=False)
+color = 'Green'
+results = reverseLookupColor(color, flower_type, lookup_table)
+print(results)
+today = date.today()
+results.to_csv(f'output/{color}_{flower_type}_{today}.csv',index=False)
 
 # 4) See possible parents of specific genotype
-# flower = '222'
-# results = reverseLookupGenotype(flower, lookup_table)
+# flower = '212'
+# results = reverseLookupGenotype(flower, flower_type, lookup_table)
 # print(results)
 # today = date.today()
-# results.to_csv(f'output/{flower}_{today}.csv',index=False)
+# results.to_csv(f'output/{flower}_{flower_type}_{today}.csv',index=False)
 
